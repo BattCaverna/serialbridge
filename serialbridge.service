@@ -1,0 +1,11 @@
+[Unit]
+Description=BattCaverna RS485 serial bridge service
+After=multi-user.target
+ 
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/serialbridge /dev/ttyAMA0 9600 2020 -r
+Restart=on-abort
+ 
+[Install]
+WantedBy=multi-user.target
