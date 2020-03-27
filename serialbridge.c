@@ -33,7 +33,6 @@
 #include "speed.h"
 #include "rts.h"
 
-void ioctl_rts(int fd, int on);
 static unsigned byte_time;
 
 extern void cfmakeraw(struct termios *);
