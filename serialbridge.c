@@ -31,10 +31,15 @@
 
 #include "check.h"
 #include "speed.h"
+#include "rts.h"
+
+void ioctl_rts(int fd, int on);
+static unsigned byte_time;
 
 extern void cfmakeraw(struct termios *);
 
 static int verbose = 0;
+static int rs485 = 0;
 
 static void makeraw(int fd) {
   struct termios t;
@@ -88,7 +93,15 @@ static int relay(int from, int to, char prefix) {
   static char buffer[1024];
   int n = read(from, buffer, sizeof buffer);
   if (n > 0) {
+    if (rs485 && prefix == '>')
+      ioctl_rts(to, 0);
     write(to, buffer, n);
+    if (rs485 && prefix == '>')
+    {
+      usleep(byte_time * n);
+      ioctl_rts(to, 1);
+    }
+
     if (verbose)
       dump(prefix, buffer, n);
   }
@@ -121,10 +134,13 @@ static void usage(int error, const char *progname) {
 
 int main(int argc, char * const argv[]) {
   int opt;
-  while ((opt = getopt(argc, argv, "hv")) != -1)
+  while ((opt = getopt(argc, argv, "hrv")) != -1)
     switch(opt) {
     case 'v':
       verbose = 1;
+      break;
+    case 'r':
+      rs485 = 1;
       break;
     case 'h':
       usage(0, argv[0]);
@@ -139,6 +155,7 @@ int main(int argc, char * const argv[]) {
     usage(1, argv[0]);
   int serial = serialsetup(argv[optind], speed);
   int listening = socketsetup(port);
+  byte_time = (10000000 + speed / 2) / speed;
   for (;;) {
     if (verbose)
       printf("Waiting for incoming connection\n");
