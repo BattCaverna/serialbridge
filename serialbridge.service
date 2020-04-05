@@ -4,7 +4,7 @@ After=multi-user.target
  
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/serialbridge /dev/ttyAMA0 9600 2020 -r
+ExecStart=/usr/local/bin/serialbridge /dev/ttyAMA0 9600 2020 -r -c
 Restart=on-abort
  
 [Install]
